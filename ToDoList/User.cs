@@ -1,18 +1,21 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
+// Class to handle user-related operations Inherit from Project Class
 class User : Project
 {
+    // { get; set } fields properties
     public string Username { get; set; }
     public string Password { get; set; }
     public int UserID { get; set; }
-    public string FilePath {  get; set; }    
+    public string FilePath { get; set; }
+
+    // Constructors
+    // Default constructor
     public User()
-    { 
+    {
     }
 
+    // Constructor with parameters
     public User(string username, string password, int userID)
     {
         Username = username;
@@ -20,6 +23,7 @@ class User : Project
         UserID = userID;
     }
 
+    // Method to validate user credentials
     public bool ValidateUser(string usr, string pass)
     {
         List<User> userList = ReadFromFile();
@@ -35,14 +39,16 @@ class User : Project
         {
             foreach (User user in userList)
             {
-                if (user.Username.ToLower().ToString().ToUpper().Equals(usr.ToUpper()) && user.Password.ToString().Equals(pass)) 
-                { 
+                if (user.Username.ToLower().ToString().ToUpper().Equals(usr.ToUpper()) && user.Password.ToString().Equals(pass))
+                {
                     return true;
                 }
             }
         }
         return false;
     }
+
+    // Method to convert user list to CSV string
     private string ConvertToCSVString(List<User> userList)
     {
         StringBuilder str = new StringBuilder();
@@ -53,6 +59,7 @@ class User : Project
         return str.ToString();
     }
 
+    // Method to convert CSV string to user list
     private List<User> ConvertStringToList(List<User> userList, string input)
     {
         int count = 0;
@@ -66,6 +73,7 @@ class User : Project
         return userList;
     }
 
+    // Method to save user list to file
     public void SaveToFile(List<User> userList)
     {
         string list = ConvertToCSVString(userList);
@@ -74,7 +82,7 @@ class User : Project
         {
             FileStream fs = File.Open(FilePath, FileMode.Append);
             using (StreamWriter sw = new StreamWriter(fs))
-            sw.Write(list);
+                sw.Write(list);
             fs.Close();
         }
         catch (Exception e)
@@ -83,7 +91,7 @@ class User : Project
         }
     }
 
-
+    // Method to read in user list from file
     public List<User> ReadFromFile()
     {
         List<User> userList = new List<User>();
@@ -108,8 +116,10 @@ class User : Project
                 ShowMenu(ConsoleColor.Red, "File couldent be opend", 0, 8);
             }
         }
-    return userList;
+        return userList;
     }
+
+    // Method to display user information
     public void Show(List<User> userList, int posX, int posY)
     {
         int count = 0;
@@ -121,6 +131,8 @@ class User : Project
         }
 
     }
+
+    // Method to display user menu
     public int ShowMenu(List<User> userList, int posX, int posY)
     {
         int count = 0;

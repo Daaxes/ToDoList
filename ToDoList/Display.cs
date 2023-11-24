@@ -1,28 +1,25 @@
-﻿// See https://aka.ms/new-console-template for more information
-//Console.WriteLine("Read Back");
-//Console.WriteLine(fileOutput.ReadFromFile(projectFile));
-
+﻿// Class to handle console display and interactions
 class Display
 {
     // Constructors
     // Default constructor
-    public Display()   
+    public Display()
     {
     }
-
+    // Method to clear a specific line on the console
     public void ClearLine(int posX, int posY)
     {
         Console.SetCursorPosition(posX, posY);
         Console.Write(new String(' ', Console.BufferWidth));
     }
-
+    // Method to clear the entire console screen
     public void ClearOutputOnScreen()
     {
         Console.Clear();
     }
-
+    // Method to clear specified lines on the console
     public void ClearOutputScreenFromPosY(int posY, int lines)
-    { 
+    {
         for (int i = posY; i < lines + 1 + posY; i++)
         {
             ClearLine(0, i);
@@ -34,7 +31,7 @@ class Display
     {
         Console.SetCursorPosition(posX, posY);
     }
-
+    // Method to display category information
     public void ShowCategory(int posX, int posY)
     {
         Console.SetCursorPosition(posX, posY);
@@ -46,11 +43,11 @@ class Display
         Console.WriteLine(">> [2] Add new User:");
         Console.WriteLine(">> [3] Edit Task:");
         Console.WriteLine(">> [Q] Save and Quit:");
-        ShowMenu(ConsoleColor.Green, ">> Make your choise",0 ,7);
+        ShowMenu(ConsoleColor.Green, ">> Make your choise", 0, 7);
         Console.ResetColor();
     }
 
-    //  witout  clear line first Writing out a string at specific position
+    // Method to display a menu item at a specific position
     public void ShowMenu(ConsoleColor menuColor, string menuText, int posX, int posY)
     {
         int len = menuText.Length;
@@ -62,9 +59,9 @@ class Display
         Console.ResetColor();
         SetCursurPos(len + 1, posY);
     }
-    // Writing out a string at specific position witout  clear line first 
+    // Method to display a string at a specific position without clearing the line first
     public void ShowString(ConsoleColor menuColor, string str, int posX, int posY)
-    { 
+    {
         Console.ForegroundColor = menuColor;
         SetCursurPos(posX, posY);
         Console.Write(str);

@@ -1,6 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Text;
+﻿using System.Text;
 
+// Class to handle project-related operations Inharit from Display class
 class Project : Display
 {
     public string Task { get; set; }
@@ -12,9 +12,11 @@ class Project : Display
 
     // Constructors
     // Defalt Constructor
-    public Project() 
-    { 
+    public Project()
+    {
     }
+
+    // Constructor with parameters
     public Project(string task, string description, string doneBy, DateTime dateOfTask)
     {
         Task = task;
@@ -24,6 +26,7 @@ class Project : Display
         TaskDone = false;
     }
 
+    // Constructor with parameters and optional parameter for TaskDone
     public Project(string task, string description, string doneBy, DateTime dateOfTask, bool taskDone = false)
     {
         Task = task;
@@ -33,6 +36,7 @@ class Project : Display
         TaskDone = taskDone;
     }
 
+    // Method to convert project list to CSV string
     private string ConvertToCSVString(List<Project> projectList)
     {
         StringBuilder str = new StringBuilder();
@@ -43,6 +47,7 @@ class Project : Display
         return str.ToString();
     }
 
+    // Method to convert CSV string to project list
     private List<Project> ConvertStringToList(List<Project> projectList, string input)
     {
         int count = 0;
@@ -56,6 +61,7 @@ class Project : Display
         return projectList;
     }
 
+    // Method to save project list to file
     public void SaveToFile(List<Project> projectList)
     {
         string list = ConvertToCSVString(projectList);
@@ -73,6 +79,7 @@ class Project : Display
         }
     }
 
+    // Method to read project list from file
     public List<Project> ReadFromFile()
     {
         List<Project> projectList = new List<Project>();
@@ -99,8 +106,8 @@ class Project : Display
         }
         return projectList;
     }
-//    public Project(string task, DateTime dateOfTask, string description, string doneBy, bool taskDone = false)
 
+    // Method to display project menu
     public int ShowMenu(List<Project> projectList, int posX, int posY)
     {
         int count = 0;
@@ -119,7 +126,8 @@ class Project : Display
         }
         return count + 1;
     }
- 
+
+    // Method to choose a project from the list
     public int ChooseFromProduct(List<Project> projectList, int posX, int posY)
     {
         int count = 0;
@@ -131,7 +139,7 @@ class Project : Display
 
         ShowMenu(ConsoleColor.Green, "  ".PadRight(9) + "Tasks".PadRight(padLenTask) + "Deskription".PadRight(padLenDescription) + " DoneBy".PadRight(lenDoneBy) + " Date of the task".PadRight(18) + "Task Done", posX, posY);
         SetCursurPos(posX, posY);
-        
+
         foreach (Project project in projectList)
         {
             ShowMenu(ConsoleColor.Green, $">> [{(count + 1)}] - {project.Task.PadRight(padLenTask)}{project.Description.PadRight(padLenDescription)} {project.DoneBy.PadRight(lenDoneBy)} {project.DateOfTask.ToString("yy-MM-dd").PadRight(17)}{project.TaskDone} ", 0, posY + 1 + count);

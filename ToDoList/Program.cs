@@ -1,13 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
-// Define console colors
+// Define console colors and milliseconds
 const ConsoleColor darkYelloe = ConsoleColor.DarkYellow;
 const ConsoleColor red = ConsoleColor.Red;
 const ConsoleColor green = ConsoleColor.Green;
@@ -15,48 +9,29 @@ const ConsoleColor blue = ConsoleColor.Blue;
 const ConsoleColor yellow = ConsoleColor.Yellow;
 const int milliseconds = 2000;
 
+// Create instances of classes
 Project project = new Project();
 User user = new User();
 Display display = new Display();
 
+// Get the current directory and set file paths
 string dir = System.IO.Directory.GetCurrentDirectory();
 user.FilePath = dir.Split("\\bin")[0] + "\\users.csv";
 project.FilePath = dir.Split("\\bin")[0] + "\\project.csv";
+
+// Creates List of Users, Project, Strings
 List<User> userList = new List<User>();
 List<string> inputList = new List<string>();
 List<string> userListString = new List<string>();
 List<Project> projectList = new List<Project>();
 StringBuilder input = new StringBuilder();
 
+// Read in Users and Projects from file to list
 userList = user.ReadFromFile();
 projectList = project.ReadFromFile();
 
-bool checkDate(string date)
-{
-    try
-    {
-        DateTime dateNow = DateTime.Now.Date;
-        DateTime toDoDate = Convert.ToDateTime(date.ToString()).Date;
-
-        int result = DateTime.Compare(dateNow, toDoDate);
-        if (result > 0)
-        {
-            Console.WriteLine("Date cant be in past | Try again!");
-            return false;
-        }
-    }
-    catch (FormatException e)
-    {
-        Console.WriteLine("Wrong format of Date | Try again!", 0, 2);
-        return false;
-    }
-
-    return true;
-}
-
-
 // Function to create user
-// return Tuple with List<User> and bool
+// return Tuple with List<User> and bool value
 Tuple<List<User>, bool> CreateUsers(List<User> userList)
 {
     int userId = 1;
@@ -81,7 +56,7 @@ Tuple<List<User>, bool> CreateUsers(List<User> userList)
 
     display.ShowMenu(green, "Enter Password:", 0, 9);
     string password = Console.ReadLine();
- 
+
     if (password.ToUpper().Equals("Q"))
     {
         return Tuple.Create(userList, false);
@@ -115,9 +90,10 @@ Tuple<List<User>, bool> CreateUsers(List<User> userList)
     return Tuple.Create(userList, true);
 }
 
+// Function to create a task
+// Returns a Tuple with List<Project> and a bool
 Tuple<List<Project>, bool> CreateTask(List<Project> projectList, List<User> userList)
 {
-    int listLen = 0;
     DateTime date;
     display.ClearOutputScreenFromPosY(9, projectList.Count);
     display.ShowString(green, " ", 4, 3);
@@ -158,7 +134,7 @@ Tuple<List<Project>, bool> CreateTask(List<Project> projectList, List<User> user
                 break;
             }
         }
-        catch(Exception ex) 
+        catch (Exception ex)
         {
             display.ShowMenu(red, "Date not valid!", 0, 11);
             display.ShowMenu(red, "You must write a valid date from today and in future", 0, 11);
@@ -200,29 +176,32 @@ Tuple<List<Project>, bool> CreateTask(List<Project> projectList, List<User> user
 
 }
 
+// Function to mark a task as done
 void SetTaskDone(List<Project> projectList)
 {
     do
-    { 
+    {
         project.ChooseFromProduct(projectList, 0, 9);
         display.SetCursurPos(21, 7);
 
         try
         {
             int chosen = Int32.Parse(Console.ReadLine());
-            projectList[chosen -1 ].TaskDone = true;
+            projectList[chosen - 1].TaskDone = true;
             display.ClearOutputScreenFromPosY(9, projectList.Count);
             break;
         }
         catch (Exception e)
         {
-            display.ShowMenu(red, "Something went wrong", 0, 9); 
-            
+            display.ShowMenu(red, "Something went wrong", 0, 9);
+
         }
     }
-    while(true);
+    while (true);
 
 }
+
+// Function to update the display with the number of tasks and completed tasks
 void updateDisplayTaskDone(List<Project> projectList)
 {
     int task = projectList.Count();
@@ -231,6 +210,7 @@ void updateDisplayTaskDone(List<Project> projectList)
     display.ShowString(blue, taskDone.ToString(), 30, 1);
 }
 
+// Function to check user login credentials
 bool checkLogin()
 {
     string username = "";
@@ -252,11 +232,13 @@ bool checkLogin()
     return false;
 }
 
+// Function to display a list of users
 void showUsers(List<User> userList)
 {
     user.Show(userList, 0, 9);
 }
-// If no users -> Create users
+
+// If no users or userlistfile not exist -> You must Create users
 if (userList.Count() == 0)
 {
     display.ShowMenu(red, "UserList is empty", 0, 0);
@@ -270,9 +252,9 @@ if (userList.Count() == 0)
 
     while (true)
     {
-        Tuple< List<User>, bool> myTuple = CreateUsers(userList);
+        Tuple<List<User>, bool> myTuple = CreateUsers(userList);
         userList = myTuple.Item1;
-        
+
         // Have pressed Q for quit
         if (!myTuple.Item2)
         {
@@ -296,37 +278,39 @@ if (userList.Count() == 0)
 Console.Clear();
 display.ShowMenu(yellow, "Logon to ToDo List", 0, 0);
 
-while (!checkLogin());
+// Check if logon is right 
+while (!checkLogin()) ;
 display.ShowMenu(green, "Login Worked!", 0, 2);
 Thread.Sleep(milliseconds);
 display.ClearLine(0, 2);
 
+// 
 while (true)
 {
-    display.ShowCategory(0, 0);
-    updateDisplayTaskDone(projectList);
-    display.SetCursurPos(21, 7);
-    Console.ResetColor();
-    input.Append(Console.ReadLine());
+    display.ShowCategory(0, 0);                     // Write out ToDo List graphics
+    updateDisplayTaskDone(projectList);             // Write out how many task there are and how many is done  
+    display.SetCursurPos(21, 7);                    // Set Cursur to input line
+    Console.ResetColor();                           // Resets forground color
+    input.Append(Console.ReadLine());               // Read input to StringBuilder input
 
-    switch (input.ToString())
+    switch (input.ToString())           
     {
         case "1":
-            project.ShowMenu(projectList, 0, 9);
+            project.ShowMenu(projectList, 0, 9);    // Write out Projectlist
             break;
         case "2":
-            CreateTask(projectList, userList);
+            CreateTask(projectList, userList);      // Write out Create Tash menues
             break;
         case "3":
-            SetTaskDone(projectList);
+            SetTaskDone(projectList);               // Edit Project list if task is done
             break;
         case "4":
-            project.SaveToFile(projectList);
+            project.SaveToFile(projectList);        // Save projectlist to file in Current working directory
             break;
         default:
             break;
     }
-    if (input.ToString().ToUpper().Equals("Q"))
+    if (input.ToString().ToUpper().Equals("Q"))     // Save projectlist to file end exit program
     {
         project.SaveToFile(projectList);
         display.ShowMenu(green, "Task added successfully", 0, 10);
@@ -334,5 +318,5 @@ while (true)
         Console.Clear();
         System.Environment.Exit(0);
     }
-    input.Clear();
+    input.Clear();                                  // Clear input variable
 }
