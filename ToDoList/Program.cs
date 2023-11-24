@@ -1,197 +1,204 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
-Console.WriteLine("Hello, World!");
-string path = "c:\\tmp\\test.txt";
-Output fileOutput = new Output();
+// Define console colors
+const ConsoleColor darkYelloe = ConsoleColor.DarkYellow;
+const ConsoleColor red = ConsoleColor.Red;
+const ConsoleColor green = ConsoleColor.Green;
+const ConsoleColor blue = ConsoleColor.Blue;
+const ConsoleColor yellow = ConsoleColor.Yellow;
+const int milliseconds = 2000;
 
+Display display = new Display();
+
+bool checkDate(string date)
+{
+    try
+    {
+        DateTime dateNow = DateTime.Now.Date;
+        DateTime toDoDate = Convert.ToDateTime(date.ToString()).Date;
+
+        int result = DateTime.Compare(dateNow, toDoDate);
+        if (result > 0)
+        {
+            Console.WriteLine("Date cant be in past | Try again!");
+            return false;
+        }
+    }
+    catch (FormatException e)
+    {
+        Console.WriteLine("Wrong format of Date | Try again!", 0, 2);
+        return false;
+    }
+
+    return true;
+}
+
+
+// Function to create user
+// return Tuple with List<User> and bool
+Tuple<List<User>, bool> CreateUsers(List<User> userList)
+{
+    int userId = 1;
+    int listLen = 0;
+
+    if (userList.Count() > 0)
+    {
+        userId = userList.Max(User => User.UserID) + 1;
+    }
+
+    display.ShowMenu(green, "Enter Username:", 0, 2);
+    string username = Console.ReadLine();
+
+    if (username.ToUpper().Equals("Q"))
+    {
+        return Tuple.Create(userList, false);
+    }
+
+    display.ShowMenu(green, "Enter Password:", 0, 2);
+    string password = Console.ReadLine();
+ 
+    if (password.ToUpper().Equals("Q"))
+    {
+        return Tuple.Create(userList, false);
+    }
+
+    listLen = userList.Count();
+
+    userList.Add(new User(username, password, userId));
+
+    if (listLen < userList.Count())
+    {
+        display.ShowMenu(green, "Product added successfully", 0, 3);
+        Thread.Sleep(milliseconds);
+        display.ClearLine(0, 3);
+    }
+    else
+    {
+        display.ShowMenu(red, "Somting went wrong", 0, 3);
+        Thread.Sleep(milliseconds);
+        display.ClearLine(0, 3);
+    }
+    return Tuple.Create(userList, true);
+}
+
+string dir = System.IO.Directory.GetCurrentDirectory();
+string userFile = dir.Split("\\bin")[0] + "\\users.csv";
+string projectFile = dir.Split("\\bin")[0] + "\\project.csv";
+Console.WriteLine("ToDo List! ");
+Console.WriteLine($"Userpath: {userFile} \nProjectPath: {projectFile}");
+
+Project project = new Project();
+User user = new User();
 StringBuilder csv = new StringBuilder();
+List<string> inputList = new List<string>();
+List<string> userListString = new List<string>();
+List<Project> projectList = new List<Project>();
+List<User> userList = new List<User>();
 
-List<Car> cars = new List<Car>();
-List<Car> readbackcars = new List<Car>();
-Car car1 = new Car("Volvo", "V90");
-car1.Year = 2019;
-Car car2 = new Car("SAAB", "900T");
-//carBrands.Add(car1);  // Can not add to string list
-Car car3 = new Car("BMW", "XL200", 2020);
+userList = user.ReadFromFile(userFile);
+user.Show(userList, 0, 4);
 
-cars.Add(car1);
-cars.Add(car2);
-cars.Add(car3);
-
-foreach (Car car in cars)
+if (userList.Count() == 0)
 {
-    csv.Append("," + car.Brand+ "," + car.Model + "\n");
-//    Console.WriteLine($"Brand: {car.Brand} Model: {car.Model}");
+    display.ShowMenu(red, "UserList is empty", 0, 0);
+    display.ShowMenu(red, "You must have at least i user in ToDo List!", 0, 1);
+    Thread.Sleep(milliseconds);
+    display.ShowMenu(green, "Create users | Press [Q] to Quit", 0, 0);
+    display.ClearLine(0, 1);
+    display.ClearLine(0, 2);
+
+    user.Show(userList, 0, 4);
+
+    while (true)
+    {
+        Tuple< List<User>, bool> myTuple = CreateUsers(userList);
+        userList = myTuple.Item1;
+
+        if (!myTuple.Item2)
+        {
+            user.Show(userList, 0, 4);
+            display.ShowMenu(green, "Do you want to save userlist to file? [Y/N]", 0, 2);
+            string choice = Console.ReadLine();
+            if (choice.ToUpper().Equals("Y"))
+            {
+                user.SaveToFile(userList, userFile);
+            }
+
+        }
+    }
 }
 
-//List<Car> FileCars = 
-Console.WriteLine(fileOutput.ReadFromFile("c:\\tmp\\test.txt"));
-                               //.Skip(1)
-                               //.Select(Car => FileCars.FromCsv(Car)
-                               //.ToList();
 
 
+int flag = 0;
 
-string textString = "These lines will be writend to test.txt";
+    string[] messageStr = new string[] {"Skriv in en task", "Skriv in ett datum yy-MM-dd", "Skriv in beskrivning", "Skriv in vem som utför tasken"};
 
-fileOutput.WriteFile(path, textString);
+//Console.WriteLine("Klicka på [Q] för exit");
 
-Console.WriteLine("Read Back");
-string str = fileOutput.OpenFileForRead(path);
-
-//foreach (string.)
-//Console.WriteLine(IOoutput.OpenFileForWrite("c:\textfile.txt"));
-
-// Output class for managing console and print to file output
-class Output
+while (true)
 {
-    // Constructors
-    // Default constructor
-    public Output()   
+    Console.WriteLine(messageStr[flag]);
+    inputList.Add(Console.ReadLine());
+ 
+    if (inputList[flag].ToString().ToUpper().Equals("Q"))
     {
+        project.PrintToFile(projectList, projectFile);
+
+        Console.WriteLine("Are you sure that you want to exit? [Y/N]");
+        inputList.Add(Console.ReadLine());
+        if (inputList[flag].ToString().ToUpper().Equals("Y"))
+        { break; }
     }
 
-    // Constructor for file handeling
-    public Output(string filePath, string fileName, string fileExtension, string fileType)
+    if (messageStr[flag].ToString().ToLower().Contains("datum"))
     {
-        FilePath = filePath;
-        FileName = fileName;
-        FileExtension = fileExtension;
-        FileType = fileType;
-    }
-
-    public bool FileExists { get; set; }
-    public int PosX { get; set; }
-    public int PosY { get; set; }
-    public string FilePath { get; set; }
-    public string FileName { get; set; }
-    public string FileExtension { get; set; }
-    public string FileType { get; set; }
-    
-    public string ReadFromFile(string fileName)
-    {
-             string line;
-       try
+        if (!checkDate(inputList[flag]))
         {
-            StreamReader fileRead = new StreamReader(fileName);
-
-            line = fileRead.ReadLine();
-
-            while (line != null)
-            {
-                Console.WriteLine(line);
-                line = fileRead.ReadLine();
-            }
+            inputList.RemoveAt(flag);
         }
-        catch (Exception e)
+        else
         {
-            return "File couldent be opend";
+            flag++;
         }
-
-        return line;
+    }
+    else
+    {
+        flag++;
     }
 
-    
-    public void WriteListToFile(StringBuilder csv)
-    {
-//        Console.WriteLine(csv);
-        string dir = "c:\\tmp\\test.txt";
-        File.WriteAllText(dir, csv.ToString());
-    
-    }
-    public string WriteFile(string path, string textString)
-    {
-        try
+    if (flag == messageStr.Length)
+    { 
+        int listSize = projectList.Count;
+        projectList.Add(new Project(inputList[0], Convert.ToDateTime(inputList[1]), inputList[2], inputList[3]));
+        if (listSize < projectList.Count)
         {
-            if (!File.Exists(path))
-            {
-                using (FileStream fs = File.Create(path))
-                {
-                    System.IO.File.WriteAllText(path, "Text to add to the file\n");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"{path} File exists");
-                //                Console.WriteLine($"{path} File dont exist");
-            }
+            Console.WriteLine("Product added successfully");
+            Thread.Sleep(milliseconds);
+            flag = 0;
+            inputList.Clear();
         }
-        catch (Exception e)
+        else 
         {
-            Console.WriteLine("File couldent be opend");
+            Console.WriteLine("Something went wrong when it should be added to projectList!");
         }
-        finally
-        {
-            Console.WriteLine("Done");
-        }
-        return "";
     }
-    public void ClearLine(int posX, int posY)
-    {
-        Console.SetCursorPosition(posX, posY);
-        Console.Write(new String(' ', Console.BufferWidth));
-    }
+}
 
-    public void ClearOutputOnScreen()
-    {
-        Console.Clear();
-    }
+class Rating : Project
 
-
-    // Metods for set the positions
-    public void SetCursurPos(int posX, int posY)
-    {
-        Console.SetCursorPosition(posX, posY);
-    }
-
-    public void ShowCategory()
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Product".PadRight(10) + "Brand".PadRight(10) + "Model".PadRight(15) + "Office".PadRight(15) + "Purchase Date".PadRight(14) + "Price in USD".PadRight(17) + "Currency".PadRight(10) + "Local price");
-        Console.WriteLine("-------".PadRight(10) + "-----".PadRight(10) + "-----".PadRight(15) + "------".PadRight(15) + "-------------".PadRight(14) + "------------".PadRight(17) + "--------".PadRight(10) + "-----------");
-        Console.ResetColor();
-    }
-
-    public void ShowMenu(ConsoleColor menuColor, string menuText, int posX, int posY)
-    {
-        int len = menuText.Length;
-
-        ClearLine(posX, posY);
-        Console.ForegroundColor = menuColor;
-        SetCursurPos(posX, posY);
-        Console.WriteLine(menuText);
-        Console.ResetColor();
-        SetCursurPos(len + 1, posY);
-    }
-
+{ 
 
 }
-class Car
-{
-    public Car(string brand, string model)
-    {
-        Brand = brand;
-        Model = model;
-    }
 
-    public Car(string brand, string model, int year)
-    {
-        Brand = brand;
-        Model = model;
-        Year = year;
-    }
+class Details : Project
+{ 
 
-    public static Car FromCsv(string csv)
-    {
-        string[] csvStr = csv.Split(',');
-        Car cars = new Car();
-        cars.Brand = Convert.ToString(csvStr[0]);
-        cars.Model = Convert.ToString(csvStr[1]);
-        return cars;
-    }
-    public string Brand { get; set; }
-    public string Model { get; set; }
-    public int Year { get; set; }
 }
